@@ -25,7 +25,10 @@ grep -o -E "<h3 class=\"heading-size-3\">([a-zA-Z ,']+)<\/h3>\
 
 # Rewrite each line to strip out the HTML and format the info:
 gawk -F [\>\<=\"] -e '/\<h3|\<h2/ { gsub(/Classic | Loot/, ""); print $6 }' \
-	-e '/\<a/ { print $5 ";" $7 ";https://classic.wowhead.com/item=" $5 "/" }' "${TEMPFILE}" > "${TEMPAWKFILE}"
+	-e '/\<a/ { formattedName = tolower($7); \
+		formattedName = gensub(/ /, "-", "g", formattedName); \
+		formattedName = gensub(/[,\047]/, "", "g", formattedName); \
+		print $5 ";" $7 ";https://classic.wowhead.com/item=" $5 "/" formattedName }' "${TEMPFILE}" > "${TEMPAWKFILE}"
 
 # Tidy up:
 #rm "${TEMPFILE}" "${TEMPTRIMFILE}" "${TEMPAWKFILE}"
