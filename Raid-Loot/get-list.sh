@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Extracts the data for loot drops in the raid at the specified URL
-# Calls the external Python script extract-html-element.py
+# Calls the external Python script get-html-element.py
 
 # VARIABLES
 DATESTAMP="$(date +%Y-%m-%d-%H%M%S)"
@@ -11,7 +11,7 @@ TEMPTRIMFILE="${TEMPFILE}-trimmed"
 TEMPEGREPSCRIPT="${TEMPFILE}-egrep"
 TEMPAWKFILE="${TEMPFILE}-awk"
 FINALFILE="${TEMPFILE}-final"
-PYTHONSCRIPT="extract-html-element.py"
+PYTHONSCRIPT="get-html-element.py"
 
 #Populate egrep file:
 echo "<h3 class=\"heading-size-3\">([a-zA-Z ,']+)<\/h3>" > "${TEMPEGREPSCRIPT}"
