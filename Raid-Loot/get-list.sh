@@ -7,9 +7,7 @@
 DATESTAMP="$(date +%Y-%m-%d-%H%M%S)"
 URL="${1}"
 TRIMMEDURL="${URL##*/}"
-RAIDNAME="$(awk -v myString=${TRIMMEDURL} -e 'BEGIN { gsub(/-loot.+$/, "", myString); \
-	gsub(/-/, " ", myString); \
-	print myString }')"
+RAIDNAME="$(awk -v myString=${TRIMMEDURL} -e 'BEGIN { gsub(/-loot.+$/, "", myString); print myString }')"
 TEMPFILE="${TRIMMEDURL}-${DATESTAMP}"      # Greedily trim everything from front (##) matching any character (*) until last occurring "/"
 TEMPTRIMFILE="${TEMPFILE}-trimmed"
 TEMPAWKFILE="${TEMPFILE}-awk"
