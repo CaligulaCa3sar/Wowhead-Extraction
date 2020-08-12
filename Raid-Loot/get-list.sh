@@ -27,9 +27,9 @@ grep -o -E "<h3 class=\"heading-size-3\">([a-zA-Z ,']+)<\/h3>\
 # Rewrite each line to strip out the HTML and format the info:
 awk -F [\>\<=\"] -e '/\<h3|\<h2/ { gsub(/Classic | Loot/, ""); print $6 }' \
 	-e '/\<a/ { formattedName = tolower($7); \
-		formattedName = gsub(/ /, "-", formattedName); \
-		formattedName = gsub(/[:,\047]/, "", formattedName); \
-		formattedName = gsub(/-{3}/, "-", formattedName); \
+		formattedName = gensub(/ /, "-", "g", formattedName); \
+		formattedName = gensub(/[,\047:]/, "", "g", formattedName); \
+#		formattedName = gensub(/-{3}/, "-", "g", formattedName); \
 		print $5 ";" $7 ";https://classic.wowhead.com/item=" $5 "/" formattedName }' "${TEMPFILE}" > "${TEMPAWKFILE}"
 
 # Split $TEMPAWKFILE into separate files for each boss:
