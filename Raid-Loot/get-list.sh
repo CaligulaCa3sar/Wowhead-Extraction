@@ -6,17 +6,20 @@
 # VARIABLES
 DATESTAMP="$(date +%Y-%m-%d-%H%M%S)"
 URL="${1}"
-TEMPFILE="${URL##*/}-${DATESTAMP}"      # Greedily trim everything from front (##) matching any character (*) until last occurring "/"
+TRIMMEDURL="${URL##*/}"
+RAIDNAME="$(awk -v myString=${TRIMMEDURL} -e 'BEGIN { gsub(/-loot.+$/, "", myString); \
+	gsub(/-/, " ", myString); \
+	print myString }')"
+TEMPFILE="${TRIMMEDURL}-${DATESTAMP}"      # Greedily trim everything from front (##) matching any character (*) until last occurring "/"
 TEMPTRIMFILE="${TEMPFILE}-trimmed"
 TEMPAWKFILE="${TEMPFILE}-awk"
-FINALFILE="${TEMPFILE}-final"
-PYTHONSCRIPT="get-html-element.py"
+PYSCRIPT="get-html-element.py"
 
 # Retrieve the page with cURL and output to $TEMPFILE:
 curl -o "${TEMPFILE}" "${URL}"
 
 # Extract desired element from $TEMPFILE using Python and BeautifulSoup4 and save output to $TEMPTRIMFILE:
-python3 "${PYTHONSCRIPT}" "${TEMPFILE}" > "${TEMPTRIMFILE}"
+python3 "${PYSCRIPT}" "${TEMPFILE}" > "${TEMPTRIMFILE}"
 
 # Extract loot source headers and item hyperlinks from $TEMPTRIMFILE and write back into $TEMPFILE:
 grep -o -E "<h3 class=\"heading-size-3\">([a-zA-Z ,']+)<\/h3>\
@@ -24,18 +27,19 @@ grep -o -E "<h3 class=\"heading-size-3\">([a-zA-Z ,']+)<\/h3>\
 |<a href=\"\/item=[0-9]+\">([a-zA-Z ,':-]+)<\/a>" "${TEMPTRIMFILE}" | sed -n -e '/<h3 /,$p' > "${TEMPFILE}"
 
 # Rewrite each line to strip out the HTML and format the info:
-gawk -F [\>\<=\"] -e '/\<h3|\<h2/ { gsub(/Classic | Loot/, ""); print $6 }' \
+awk -F [\>\<=\"] -e '/\<h3|\<h2/ { gsub(/Classic | Loot/, ""); print $6 }' \
 	-e '/\<a/ { formattedName = tolower($7); \
-		formattedName = gensub(/ /, "-", "g", formattedName); \
-		formattedName = gensub(/[:,\047]/, "", "g", formattedName); \
-		formattedName = gensub(/-{3}/, "-", "g", formattedName); \
+		formattedName = gsub(/ /, "-", formattedName); \
+		formattedName = gsub(/[:,\047]/, "", formattedName); \
+		formattedName = gsub(/-{3}/, "-", formattedName); \
 		print $5 ";" $7 ";https://classic.wowhead.com/item=" $5 "/" formattedName }' "${TEMPFILE}" > "${TEMPAWKFILE}"
 
 # Split $TEMPAWKFILE into separate files for each boss:
 awk -v i=0 -e '{ if (!/;/) i++; print $0 >> "Boss"i }' "${TEMPAWKFILE}"
 
 # Create directory for the "Boss*" files and move them in:
-
+mkdir "${RAIDNAME}"
+mv ./Boss* "${RAIDNAME}"/
 
 # Tidy up:
-#rm "${TEMPFILE}" "${TEMPTRIMFILE}" "${TEMPAWKFILE}"
+rm "${TEMPFILE}" "${TEMPTRIMFILE}" "${TEMPAWKFILE}"
