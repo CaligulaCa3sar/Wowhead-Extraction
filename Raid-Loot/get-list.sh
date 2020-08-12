@@ -6,9 +6,9 @@
 # VARIABLES
 DATESTAMP="$(date +%Y-%m-%d-%H%M%S)"
 URL="${1}"
-TRIMMEDURL="${URL##*/}"
+TRIMMEDURL="${URL##*/}"      # Greedily trim everything from front (##) matching any character (*) until last occurring "/"
 RAIDNAME="$(awk -v myString=${TRIMMEDURL} -e 'BEGIN { gsub(/-loot.+$/, "", myString); print myString }')"
-TEMPFILE="${TRIMMEDURL}-${DATESTAMP}"      # Greedily trim everything from front (##) matching any character (*) until last occurring "/"
+TEMPFILE="${TRIMMEDURL}-${DATESTAMP}"
 TEMPTRIMFILE="${TEMPFILE}-trimmed"
 TEMPAWKFILE="${TEMPFILE}-awk"
 PYSCRIPT="get-html-element.py"
