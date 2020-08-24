@@ -51,10 +51,15 @@ awk -F [\>\<=\"] -e '/\<h3|\<h2/ { gsub(/Classic | Loot/, ""); print $6 }' \
 		print $5 ";" $7 ";https://classic.wowhead.com/item=" $5 "/" formattedName }' "${TEMPFILE}" > "${TEMPAWKFILE}"
 
 # Split $TEMPAWKFILE into separate files for each boss:
-awk -v i=0 -e '{ if (!/;/) i++; print $0 >> "Boss"i }' "${TEMPAWKFILE}"
+awk -v i=0 -e '{ if (!/;/) i++; print $0 >> "Boss"sprintf("%02d", i) }' "${TEMPAWKFILE}"
+
+# Get list of boss files and find the last one:
+BOSSFILES=(./Boss*)
+POS=$(( ${#BOSSFILES[*]} - 1 ))
+LAST="${BOSSFILES[$POS]}"
 
 #Get each item's quality level and icon name:
-for i in Boss*
+for i in "${BOSSFILES[@]}"
 do
 	while read l
 	do
@@ -62,25 +67,34 @@ do
 		if [[ "${l}" =~ .*";".* ]];
 		then
 			ITEMID=$(awk -F ";" -e '{ print $1 }' <<< "${l}")
-			echo "${ITEMID}"
+			echo "Processing item ${ITEMID}"
 
+			# Get the quality and icon data from the getItemDetails function:
 			read ITEMQUALITY ITEMICON < <(getItemDetails "${ITEMID}")
 
+			# Output to companion file:
 			echo ";${ITEMQUALITY};${ITEMICON}" >> "${i}-2"
 		else
-			# Blank line to match where the boss name appears in the first file:
+			# Blank line in companion file to match where the boss name appears in the first file:
 			echo "" >> "${i}-2"
 		fi
 	done <${i}
 
-	# Paste the two Boss files together and tidy up:
+	# Paste the two files together without the default TAB delimiter and tidy up:
 	paste -d'\0' "${i}" "${i}-2" > "${i}.csv"
 	rm "${i}" "${i}-2"
+
+	# Change the last file's name:
+	if [[ "${i}" == "${LAST}" ]];
+	then
+		mv "${i}.csv" "Trash.csv"
+	fi
 done
 
 # Create directory for the "Boss*.csv" files and move them in:
 mkdir "${RAIDNAME}"
 mv ./Boss*.csv "${RAIDNAME}"/
+mv "Trash.csv" "${RAIDNAME}"/
 
 # Tidy up:
 rm "${TEMPFILE}" "${TEMPTRIMFILE}" "${TEMPAWKFILE}"
