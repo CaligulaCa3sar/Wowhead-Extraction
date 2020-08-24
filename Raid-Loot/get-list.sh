@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Extracts the data for loot drops in the raid at the specified URL.
-# Data is compiled in a semi-colon-separated format for easy importing into
+# Data is compiled in a semicolon-separated format for easy importing into
 # spreadsheets.
 #
 # Calls the external Python script get-html-element.py
