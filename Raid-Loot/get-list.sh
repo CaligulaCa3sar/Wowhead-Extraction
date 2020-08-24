@@ -15,13 +15,15 @@ TEMPFILE="${TRIMMEDURL}-${DATESTAMP}"
 TEMPTRIMFILE="${TEMPFILE}-trimmed"
 TEMPAWKFILE="${TEMPFILE}-awk"
 PYSCRIPT="get-html-element.py"
+ITEMQUALITY=""
+ITEMICON=""
 
 # FUNCTIONS
 
 # Extract additional information from the specific item page:
 function getItemDetails()
 {
-        local ITEMURL ITEMXML
+        local ITEMURL ITEMXML ITEMQUALITY ITEMICON
         ITEMURL="https://classic.wowhead.com/item=${1}&xml"
         ITEMXML=$(curl -s "${ITEMURL}")
         ITEMQUALITY=$(echo "${ITEMXML}" | xmlstarlet sel -t -v '//quality' -n)
